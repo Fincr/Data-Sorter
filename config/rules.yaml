@@ -21,8 +21,6 @@ countries:
       D03: "Dublin 3"
       D04: "Dublin 4"
       D05: "Dublin 5"
-      D06: "Dublin 6"
-      D6W: "Dublin 6W"
       D07: "Dublin 7"
       D08: "Dublin 8"
       D09: "Dublin 9"
@@ -33,11 +31,8 @@ countries:
       D14: "Dublin 14"
       D15: "Dublin 15"
       D16: "Dublin 16"
-      D17: "Dublin 17"
       D18: "Dublin 18"
       D20: "Dublin 20"
-      D22: "Dublin 22"
-      D24: "Dublin 24"
       # South Dublin / Dun Laoghaire-Rathdown Eircodes
       A94: "Blackrock"
       A96: "Dun Laoghaire"
@@ -58,8 +53,6 @@ countries:
           - 3
           - 4
           - 5
-          - 6
-          - "6W"
           - 7
           - 8
           - 9
@@ -70,11 +63,8 @@ countries:
           - 14
           - 15
           - 16
-          - 17
           - 18
           - 20
-          - 22
-          - 24
 
       # Named areas within the Greater Dublin / Lettershop zone
       lettershop_areas:
