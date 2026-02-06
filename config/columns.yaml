@@ -1,0 +1,60 @@
+# Column name aliases for auto-detection.
+# Each logical field maps to a list of known aliases (case-insensitive).
+# The detector tries: exact match → normalized → fuzzy (75% threshold).
+
+address_line_1:
+  - address line 1
+  - address1
+  - addr1
+  - address_1
+  - addressline1
+  - street
+  - street address
+  - address
+
+address_line_2:
+  - address line 2
+  - address2
+  - addr2
+  - address_2
+  - addressline2
+  - street 2
+
+address_line_3:
+  - address line 3
+  - address3
+  - addr3
+  - address_3
+  - addressline3
+
+city:
+  - city
+  - town
+  - town/city
+  - town city
+  - city/town
+  - locality
+
+county:
+  - county
+  - state
+  - province
+  - region
+  - county/state
+
+postcode:
+  - postcode
+  - post code
+  - zip
+  - zip code
+  - zipcode
+  - eircode
+  - postal code
+  - postalcode
+
+country:
+  - country
+  - country code
+  - country_code
+  - countrycode
+  - nation

@@ -1,0 +1,254 @@
+# Classification rules for address routing.
+# Structure: countries → areas → patterns/keywords.
+# First match wins within a country. Order matters.
+
+countries:
+  ireland:
+    # Patterns to detect Ireland as the country (checked against country column + combined address)
+    country_patterns:
+      - "ireland"
+      - "eire"
+      - "éire"
+      - "irl"
+      - "roi"
+      - "republic of ireland"
+
+    # Eircode prefix patterns (first 3 chars of Eircode map to routing areas)
+    eircode_routing:
+      # Dublin Eircodes
+      D01: "Dublin 1"
+      D02: "Dublin 2"
+      D03: "Dublin 3"
+      D04: "Dublin 4"
+      D05: "Dublin 5"
+      D06: "Dublin 6"
+      D6W: "Dublin 6W"
+      D07: "Dublin 7"
+      D08: "Dublin 8"
+      D09: "Dublin 9"
+      D10: "Dublin 10"
+      D11: "Dublin 11"
+      D12: "Dublin 12"
+      D13: "Dublin 13"
+      D14: "Dublin 14"
+      D15: "Dublin 15"
+      D16: "Dublin 16"
+      D17: "Dublin 17"
+      D18: "Dublin 18"
+      D20: "Dublin 20"
+      D22: "Dublin 22"
+      D24: "Dublin 24"
+      # South Dublin / Dun Laoghaire-Rathdown Eircodes
+      A94: "Blackrock"
+      A96: "Dun Laoghaire"
+      A98: "Bray"
+
+    # Areas defined by keyword/regex matching against the combined address.
+    # Checked in order; first match wins.
+    areas:
+      # Dublin districts — checked in descending numeric order to avoid
+      # "Dublin 1" matching "Dublin 10". The ireland.py handler builds
+      # these patterns dynamically with negative-lookahead guards.
+      dublin_districts:
+        routing: "LETTERSHOP"
+        # Handled dynamically by ireland.py — list here for documentation.
+        districts:
+          - 1
+          - 2
+          - 3
+          - 4
+          - 5
+          - 6
+          - "6W"
+          - 7
+          - 8
+          - 9
+          - 10
+          - 11
+          - 12
+          - 13
+          - 14
+          - 15
+          - 16
+          - 17
+          - 18
+          - 20
+          - 22
+          - 24
+
+      # Named areas within the Greater Dublin / Lettershop zone
+      lettershop_areas:
+        routing: "LETTERSHOP"
+        keywords:
+          - area: "Blackrock"
+            patterns:
+              - "blackrock"
+          - area: "Monkstown"
+            patterns:
+              - "monkstown"
+          - area: "Dun Laoghaire"
+            patterns:
+              - "dun laoghaire"
+              - "dún laoghaire"
+              - "dunlaoghaire"
+          - area: "Swords"
+            patterns:
+              - "swords"
+          - area: "Malahide"
+            patterns:
+              - "malahide"
+          - area: "Bray"
+            patterns:
+              - "bray"
+          - area: "Greystones"
+            patterns:
+              - "greystones"
+          - area: "Maynooth"
+            patterns:
+              - "maynooth"
+          - area: "Celbridge"
+            patterns:
+              - "celbridge"
+          - area: "Leixlip"
+            patterns:
+              - "leixlip"
+          - area: "Lucan"
+            patterns:
+              - "lucan"
+          - area: "Clondalkin"
+            patterns:
+              - "clondalkin"
+          - area: "Tallaght"
+            patterns:
+              - "tallaght"
+          - area: "Blanchardstown"
+            patterns:
+              - "blanchardstown"
+          - area: "Howth"
+            patterns:
+              - "howth"
+          - area: "Sandyford"
+            patterns:
+              - "sandyford"
+          - area: "Stillorgan"
+            patterns:
+              - "stillorgan"
+          - area: "Foxrock"
+            patterns:
+              - "foxrock"
+          - area: "Dalkey"
+            patterns:
+              - "dalkey"
+          - area: "Killiney"
+            patterns:
+              - "killiney"
+
+      # Counties and cities outside Dublin — routed NATIONAL
+      national_areas:
+        routing: "NATIONAL"
+        keywords:
+          - area: "Cork"
+            patterns:
+              - "\\bcork\\b"
+              - "\\bco\\.?\\s*cork\\b"
+          - area: "Galway"
+            patterns:
+              - "\\bgalway\\b"
+              - "\\bco\\.?\\s*galway\\b"
+          - area: "Limerick"
+            patterns:
+              - "\\blimerick\\b"
+              - "\\bco\\.?\\s*limerick\\b"
+          - area: "Waterford"
+            patterns:
+              - "\\bwaterford\\b"
+              - "\\bco\\.?\\s*waterford\\b"
+          - area: "Kilkenny"
+            patterns:
+              - "\\bkilkenny\\b"
+              - "\\bco\\.?\\s*kilkenny\\b"
+          - area: "Wexford"
+            patterns:
+              - "\\bwexford\\b"
+              - "\\bco\\.?\\s*wexford\\b"
+          - area: "Kerry"
+            patterns:
+              - "\\bkerry\\b"
+              - "\\bco\\.?\\s*kerry\\b"
+          - area: "Clare"
+            patterns:
+              - "\\bclare\\b"
+              - "\\bco\\.?\\s*clare\\b"
+          - area: "Mayo"
+            patterns:
+              - "\\bmayo\\b"
+              - "\\bco\\.?\\s*mayo\\b"
+          - area: "Donegal"
+            patterns:
+              - "\\bdonegal\\b"
+              - "\\bco\\.?\\s*donegal\\b"
+          - area: "Tipperary"
+            patterns:
+              - "\\btipperary\\b"
+              - "\\bco\\.?\\s*tipperary\\b"
+          - area: "Meath"
+            patterns:
+              - "\\bmeath\\b"
+              - "\\bco\\.?\\s*meath\\b"
+          - area: "Kildare"
+            patterns:
+              - "\\bkildare\\b"
+              - "\\bco\\.?\\s*kildare\\b"
+          - area: "Wicklow"
+            patterns:
+              - "\\bwicklow\\b"
+              - "\\bco\\.?\\s*wicklow\\b"
+          - area: "Louth"
+            patterns:
+              - "\\blouth\\b"
+              - "\\bco\\.?\\s*louth\\b"
+          - area: "Westmeath"
+            patterns:
+              - "\\bwestmeath\\b"
+              - "\\bco\\.?\\s*westmeath\\b"
+          - area: "Offaly"
+            patterns:
+              - "\\boffaly\\b"
+              - "\\bco\\.?\\s*offaly\\b"
+          - area: "Laois"
+            patterns:
+              - "\\blaois\\b"
+              - "\\bco\\.?\\s*laois\\b"
+          - area: "Longford"
+            patterns:
+              - "\\blongford\\b"
+              - "\\bco\\.?\\s*longford\\b"
+          - area: "Roscommon"
+            patterns:
+              - "\\broscommon\\b"
+              - "\\bco\\.?\\s*roscommon\\b"
+          - area: "Sligo"
+            patterns:
+              - "\\bsligo\\b"
+              - "\\bco\\.?\\s*sligo\\b"
+          - area: "Leitrim"
+            patterns:
+              - "\\bleitrim\\b"
+              - "\\bco\\.?\\s*leitrim\\b"
+          - area: "Cavan"
+            patterns:
+              - "\\bcavan\\b"
+              - "\\bco\\.?\\s*cavan\\b"
+          - area: "Monaghan"
+            patterns:
+              - "\\bmonaghan\\b"
+              - "\\bco\\.?\\s*monaghan\\b"
+          - area: "Carlow"
+            patterns:
+              - "\\bcarlow\\b"
+              - "\\bco\\.?\\s*carlow\\b"
+
+      # Fallback for Ireland addresses that don't match any specific area
+      ireland_other:
+        routing: "NATIONAL"
+        area: "Ireland Other"

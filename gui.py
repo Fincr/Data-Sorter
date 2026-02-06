@@ -1,0 +1,137 @@
+"""Streamlit GUI for the Data-Sorter pipeline."""
+
+import io
+import tempfile
+from pathlib import Path
+
+import pandas as pd
+import streamlit as st
+
+from src.build_address import add_combined_address
+from src.classifier import Classifier
+from src.detect_columns import detect_columns
+from src.exceptions import ColumnDetectionError, ConfigError, FileFormatError
+from src.ingest import load_file
+from src.output import write_output
+
+st.set_page_config(page_title="Data-Sorter", page_icon="📬", layout="wide")
+
+st.title("📬 Data-Sorter")
+st.markdown("Upload an address file (.xlsx or .csv) to classify addresses into routing buckets.")
+
+# Sidebar config
+st.sidebar.header("Configuration")
+rules_config = st.sidebar.text_input(
+    "Rules config path",
+    value=str(Path(__file__).parent / "config" / "rules.yaml"),
+)
+columns_config = st.sidebar.text_input(
+    "Columns config path",
+    value=str(Path(__file__).parent / "config" / "columns.yaml"),
+)
+
+# File upload
+uploaded_file = st.file_uploader(
+    "Choose an input file",
+    type=["xlsx", "csv"],
+    help="Upload an Excel (.xlsx) or CSV file with address data.",
+)
+
+if uploaded_file is not None:
+    # Save uploaded file to temp location
+    suffix = Path(uploaded_file.name).suffix
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+        tmp.write(uploaded_file.getvalue())
+        tmp_path = tmp.name
+
+    try:
+        # 1. Load
+        df = load_file(tmp_path)
+        st.success(f"Loaded **{len(df)}** rows, **{len(df.columns)}** columns from `{uploaded_file.name}`")
+
+        # 2. Detect columns
+        col_map = detect_columns(list(df.columns), Path(columns_config))
+
+        # Display detected mappings
+        st.subheader("Detected Column Mappings")
+        mapping_display = {
+            k: v for k, v in col_map.__dict__.items() if v is not None
+        }
+        col1, col2 = st.columns(2)
+        for i, (field, col_name) in enumerate(mapping_display.items()):
+            target = col1 if i % 2 == 0 else col2
+            target.markdown(f"**{field}** → `{col_name}`")
+
+        unmapped = [c for c in df.columns if c not in col_map.mapped_columns()]
+        if unmapped:
+            with st.expander("Unmapped columns"):
+                st.write(unmapped)
+
+        # Preview
+        with st.expander("Preview input data"):
+            st.dataframe(df.head(10), use_container_width=True)
+
+        # Process button
+        if st.button("🔄 Process", type="primary"):
+            with st.spinner("Classifying addresses..."):
+                # 3. Build combined address
+                df = add_combined_address(df, col_map)
+
+                # 4. Classify
+                classifier = Classifier(Path(rules_config))
+                df_classified, df_exceptions = classifier.classify(df, col_map)
+
+                # 5. Write output to bytes buffer
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as out_tmp:
+                    out_path = out_tmp.name
+
+                stats = write_output(out_path, df_classified, df_exceptions)
+
+                # Read output for download
+                with open(out_path, "rb") as f:
+                    output_bytes = f.read()
+
+            # Summary
+            st.subheader("Results")
+
+            metric1, metric2, metric3 = st.columns(3)
+            metric1.metric("Classified", stats.classified_rows)
+            metric2.metric("Exceptions", stats.exception_rows)
+            metric3.metric("Total", stats.total_rows)
+
+            # Area breakdown
+            if stats.area_counts:
+                st.subheader("Area Breakdown")
+                area_df = pd.DataFrame(
+                    sorted(stats.area_counts.items()),
+                    columns=["Area", "Count"],
+                )
+                st.dataframe(area_df, use_container_width=True, hide_index=True)
+
+            # Preview classified
+            with st.expander(f"Classified Data ({stats.classified_rows} rows)"):
+                # Drop internal columns for display
+                display_cols = [c for c in df_classified.columns if c != "combined_address"]
+                st.dataframe(df_classified[display_cols].head(50), use_container_width=True)
+
+            # Preview exceptions
+            if stats.exception_rows > 0:
+                with st.expander(f"Exceptions ({stats.exception_rows} rows)"):
+                    display_cols = [c for c in df_exceptions.columns if c != "combined_address"]
+                    st.dataframe(df_exceptions[display_cols], use_container_width=True)
+
+            # Download button
+            output_filename = Path(uploaded_file.name).stem + "_sorted.xlsx"
+            st.download_button(
+                label="📥 Download Output",
+                data=output_bytes,
+                file_name=output_filename,
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                type="primary",
+            )
+
+    except (FileFormatError, ColumnDetectionError, ConfigError) as e:
+        st.error(f"Error: {e}")
+    except Exception as e:
+        st.error(f"Unexpected error: {e}")
+        st.exception(e)
