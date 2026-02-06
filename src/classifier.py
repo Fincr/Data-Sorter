@@ -2,6 +2,7 @@
 
 import logging
 import re
+from collections.abc import Callable
 from pathlib import Path
 from typing import Optional
 
@@ -67,8 +68,12 @@ class Classifier:
         self,
         df: pd.DataFrame,
         col_map: ColumnMapping,
+        progress_callback: Callable[[int, int], None] | None = None,
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Classify all rows in the DataFrame.
+
+        Args:
+            progress_callback: Optional callback(current, total) called after each row.
 
         Returns:
             (df_classified, df_exceptions) — both with added columns:
@@ -77,8 +82,9 @@ class Classifier:
             - _exception_reason (exceptions only)
         """
         results: list[ClassificationResult] = []
+        total = len(df)
 
-        for idx, row in df.iterrows():
+        for i, (idx, row) in enumerate(df.iterrows()):
             combined = str(row.get("combined_address", ""))
             country_val = ""
             if col_map.country:
@@ -87,6 +93,9 @@ class Classifier:
 
             result = self._classify_row(combined, country_val)
             results.append(result)
+
+            if progress_callback is not None:
+                progress_callback(i + 1, total)
 
         df = df.copy()
         df["Lettershop Area"] = [r.area for r in results]

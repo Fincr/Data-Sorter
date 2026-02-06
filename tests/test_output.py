@@ -74,6 +74,14 @@ class TestWriteOutput:
         exception_row = df[df["Label"] == "Exception Rows"]
         assert exception_row.iloc[0]["Count"] == 1
 
+        # Check Routing rows exist
+        routing_rows = df[df["Category"] == "Routing"]
+        assert len(routing_rows) == 2  # LETTERSHOP and NATIONAL
+        assert set(routing_rows["Label"]) == {"LETTERSHOP", "NATIONAL"}
+
+        # Check Percentage column exists
+        assert "Percentage" in df.columns
+
     def test_returns_stats(self, tmp_path, sample_classified, sample_exceptions):
         out_path = tmp_path / "output.xlsx"
         stats = write_output(out_path, sample_classified, sample_exceptions)
@@ -84,6 +92,8 @@ class TestWriteOutput:
         assert stats.area_counts["Dublin 1"] == 1
         assert stats.area_counts["Dublin 10"] == 1
         assert stats.area_counts["Cork"] == 1
+        assert stats.routing_counts["LETTERSHOP"] == 2
+        assert stats.routing_counts["NATIONAL"] == 1
 
     def test_empty_exceptions(self, tmp_path, sample_classified):
         """Should work with no exceptions."""
@@ -120,9 +130,25 @@ class TestBuildSummaryDf:
             classified_rows=8,
             exception_rows=2,
             area_counts={"Dublin 1": 3, "Cork": 5},
+            routing_counts={"LETTERSHOP": 3, "NATIONAL": 5},
         )
         df = _build_summary_df(stats)
         assert "Category" in df.columns
         assert "Label" in df.columns
         assert "Count" in df.columns
-        assert len(df) == 5  # 2 areas + 3 totals
+        assert "Percentage" in df.columns
+        # 2 areas + 2 routing + 3 totals = 7
+        assert len(df) == 7
+
+        # Verify Routing rows
+        routing_rows = df[df["Category"] == "Routing"]
+        assert len(routing_rows) == 2
+        assert set(routing_rows["Label"]) == {"LETTERSHOP", "NATIONAL"}
+
+        # Verify percentages
+        lettershop_row = df[(df["Category"] == "Routing") & (df["Label"] == "LETTERSHOP")]
+        assert lettershop_row.iloc[0]["Percentage"] == "37.5%"
+
+        # Verify total rows have empty percentage
+        total_rows = df[df["Category"] == "Total"]
+        assert all(p == "" for p in total_rows["Percentage"])

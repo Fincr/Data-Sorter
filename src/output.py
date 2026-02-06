@@ -57,25 +57,37 @@ def _compute_stats(
     if "Lettershop Area" in df_classified.columns and classified_count > 0:
         area_counts = df_classified["Lettershop Area"].value_counts().to_dict()
 
+    routing_counts: dict[str, int] = {}
+    if "Routing" in df_classified.columns and classified_count > 0:
+        routing_counts = df_classified["Routing"].value_counts().to_dict()
+
     return PipelineStats(
         total_rows=classified_count + exception_count,
         classified_rows=classified_count,
         exception_rows=exception_count,
         area_counts=area_counts,
+        routing_counts=routing_counts,
     )
 
 
 def _build_summary_df(stats: PipelineStats) -> pd.DataFrame:
     """Build the summary sheet DataFrame."""
     rows = []
+    classified = stats.classified_rows
 
     # Area breakdown
     for area, count in sorted(stats.area_counts.items()):
-        rows.append({"Category": "Area", "Label": area, "Count": count})
+        pct = (count / classified * 100) if classified > 0 else 0.0
+        rows.append({"Category": "Area", "Label": area, "Count": count, "Percentage": f"{pct:.1f}%"})
+
+    # Routing breakdown
+    for routing, count in sorted(stats.routing_counts.items()):
+        pct = (count / classified * 100) if classified > 0 else 0.0
+        rows.append({"Category": "Routing", "Label": routing, "Count": count, "Percentage": f"{pct:.1f}%"})
 
     # Totals
-    rows.append({"Category": "Total", "Label": "Classified Rows", "Count": stats.classified_rows})
-    rows.append({"Category": "Total", "Label": "Exception Rows", "Count": stats.exception_rows})
-    rows.append({"Category": "Total", "Label": "Total Rows", "Count": stats.total_rows})
+    rows.append({"Category": "Total", "Label": "Classified Rows", "Count": stats.classified_rows, "Percentage": ""})
+    rows.append({"Category": "Total", "Label": "Exception Rows", "Count": stats.exception_rows, "Percentage": ""})
+    rows.append({"Category": "Total", "Label": "Total Rows", "Count": stats.total_rows, "Percentage": ""})
 
     return pd.DataFrame(rows)

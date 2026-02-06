@@ -65,3 +65,4 @@ class PipelineStats:
     classified_rows: int = 0
     exception_rows: int = 0
     area_counts: dict[str, int] = field(default_factory=dict)
+    routing_counts: dict[str, int] = field(default_factory=dict)

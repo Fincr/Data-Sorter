@@ -73,15 +73,30 @@ if uploaded_file is not None:
 
         # Process button
         if st.button("🔄 Process", type="primary"):
-            with st.spinner("Classifying addresses..."):
+            with st.status("Processing...", expanded=True) as status:
                 # 3. Build combined address
+                st.write("Building combined addresses...")
                 df = add_combined_address(df, col_map)
 
                 # 4. Classify
+                st.write("Classifying addresses...")
+                total_rows = len(df)
+                progress_bar = st.progress(0, text=f"Classifying row 0 / {total_rows}...")
+
+                def on_progress(current: int, total: int) -> None:
+                    progress_bar.progress(
+                        current / total,
+                        text=f"Classifying row {current} / {total}...",
+                    )
+
                 classifier = Classifier(Path(rules_config))
-                df_classified, df_exceptions = classifier.classify(df, col_map)
+                df_classified, df_exceptions = classifier.classify(
+                    df, col_map, progress_callback=on_progress
+                )
+                progress_bar.progress(1.0, text="Classification complete.")
 
                 # 5. Write output to bytes buffer
+                st.write("Writing output...")
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as out_tmp:
                     out_path = out_tmp.name
 
@@ -91,6 +106,8 @@ if uploaded_file is not None:
                 with open(out_path, "rb") as f:
                     output_bytes = f.read()
 
+                status.update(label="Processing complete!", state="complete")
+
             # Summary
             st.subheader("Results")
 
@@ -98,6 +115,13 @@ if uploaded_file is not None:
             metric1.metric("Classified", stats.classified_rows)
             metric2.metric("Exceptions", stats.exception_rows)
             metric3.metric("Total", stats.total_rows)
+
+            # Routing summary
+            if stats.routing_counts:
+                routing_cols = st.columns(len(stats.routing_counts))
+                for col, (routing, count) in zip(routing_cols, sorted(stats.routing_counts.items())):
+                    pct = (count / stats.classified_rows * 100) if stats.classified_rows > 0 else 0.0
+                    col.metric(routing, f"{count} ({pct:.1f}%)")
 
             # Area breakdown
             if stats.area_counts:
