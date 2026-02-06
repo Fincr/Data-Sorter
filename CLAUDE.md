@@ -18,9 +18,9 @@ python app.py input.csv output.xlsx --config config/rules.yaml --columns-config 
 
 ### GUI
 ```
-streamlit run Main_Page.py
+streamlit run gui.py
 ```
-- `Main_Page.py` — Landing page (carrier selection)
+- `gui.py` — Landing page (carrier selection)
 - `pages/1_Lettershop_Ireland.py` — Ireland address sorter
 - `pages/2_Configuration.py` — Config editor
 
