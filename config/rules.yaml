@@ -81,57 +81,12 @@ countries:
               - "dun laoghaire"
               - "dún laoghaire"
               - "dunlaoghaire"
-          - area: "Swords"
-            patterns:
-              - "swords"
-          - area: "Malahide"
-            patterns:
-              - "malahide"
-          - area: "Bray"
-            patterns:
-              - "bray"
-          - area: "Greystones"
-            patterns:
-              - "greystones"
-          - area: "Maynooth"
-            patterns:
-              - "maynooth"
-          - area: "Celbridge"
-            patterns:
-              - "celbridge"
-          - area: "Leixlip"
-            patterns:
-              - "leixlip"
-          - area: "Lucan"
-            patterns:
-              - "lucan"
-          - area: "Clondalkin"
-            patterns:
-              - "clondalkin"
-          - area: "Tallaght"
-            patterns:
-              - "tallaght"
           - area: "Blanchardstown"
             patterns:
               - "blanchardstown"
-          - area: "Howth"
-            patterns:
-              - "howth"
-          - area: "Sandyford"
-            patterns:
-              - "sandyford"
-          - area: "Stillorgan"
-            patterns:
-              - "stillorgan"
-          - area: "Foxrock"
-            patterns:
-              - "foxrock"
           - area: "Dalkey"
             patterns:
               - "dalkey"
-          - area: "Killiney"
-            patterns:
-              - "killiney"
 
       # Counties and cities outside Dublin — routed NATIONAL
       national_areas:
@@ -237,6 +192,51 @@ countries:
             patterns:
               - "\\bcarlow\\b"
               - "\\bco\\.?\\s*carlow\\b"
+          - area: "Swords"
+            patterns:
+              - "\\bswords\\b"
+          - area: "Malahide"
+            patterns:
+              - "\\bmalahide\\b"
+          - area: "Bray"
+            patterns:
+              - "\\bbray\\b"
+          - area: "Greystones"
+            patterns:
+              - "\\bgreystones\\b"
+          - area: "Maynooth"
+            patterns:
+              - "\\bmaynooth\\b"
+          - area: "Celbridge"
+            patterns:
+              - "\\bcelbridge\\b"
+          - area: "Leixlip"
+            patterns:
+              - "\\bleixlip\\b"
+          - area: "Lucan"
+            patterns:
+              - "\\blucan\\b"
+          - area: "Clondalkin"
+            patterns:
+              - "\\bclondalkin\\b"
+          - area: "Tallaght"
+            patterns:
+              - "\\btallaght\\b"
+          - area: "Howth"
+            patterns:
+              - "\\bhowth\\b"
+          - area: "Sandyford"
+            patterns:
+              - "\\bsandyford\\b"
+          - area: "Stillorgan"
+            patterns:
+              - "\\bstillorgan\\b"
+          - area: "Foxrock"
+            patterns:
+              - "\\bfoxrock\\b"
+          - area: "Killiney"
+            patterns:
+              - "\\bkilliney\\b"
 
       # Fallback for Ireland addresses that don't match any specific area
       ireland_other:

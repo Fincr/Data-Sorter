@@ -24,6 +24,40 @@ st.info("Changes are saved to disk and take effect on the next processing run.")
 # Session state helpers
 # ---------------------------------------------------------------------------
 
+def _clear_stale_keys(prefix: str, start_idx: int) -> None:
+    """Delete session-state keys matching *prefix* with index >= *start_idx*.
+
+    Streamlit caches widget values by key.  When a list item is removed and
+    the remaining items shift down by one index, the old keys still hold the
+    previous values, causing the UI to display stale data after ``st.rerun()``.
+    Clearing the affected keys forces Streamlit to re-read from the underlying
+    data on the next render.
+    """
+    to_delete = [
+        k for k in list(st.session_state.keys())
+        if k.startswith(prefix) and _key_index(k, prefix) >= start_idx
+    ]
+    for k in to_delete:
+        del st.session_state[k]
+
+
+def _key_index(key: str, prefix: str) -> int:
+    """Extract the leading integer index from *key* after *prefix*.
+
+    E.g. ``_key_index("ls_area_3", "ls_area_")`` → 3.
+    Returns -1 if no valid integer is found.
+    """
+    rest = key[len(prefix):]
+    # The index is the first contiguous sequence of digits
+    digits = ""
+    for ch in rest:
+        if ch.isdigit():
+            digits += ch
+        else:
+            break
+    return int(digits) if digits else -1
+
+
 def _init_rules_state():
     """Load rules config into session state if not already present."""
     if "rules_loaded" not in st.session_state:
@@ -193,6 +227,7 @@ def _render_rules_tab():
                     pat_to_remove = j
             if pat_to_remove is not None:
                 pats.pop(pat_to_remove)
+                _clear_stale_keys(f"ls_pat_{i}_", pat_to_remove)
                 st.rerun()
             c1, c2 = st.columns(2)
             if c1.button("Add Pattern", key=f"ls_pat_add_{i}"):
@@ -203,6 +238,8 @@ def _render_rules_tab():
             st.divider()
         if area_to_remove is not None:
             keywords.pop(area_to_remove)
+            for pfx in ("ls_area_", "ls_pat_", "ls_pat_rm_", "ls_pat_add_", "ls_area_rm_"):
+                _clear_stale_keys(pfx, area_to_remove)
             st.rerun()
         if st.button("Add New Lettershop Area", key="ls_add"):
             keywords.append({"area": "", "patterns": [""]})
@@ -233,6 +270,7 @@ def _render_rules_tab():
                     pat_to_remove = j
             if pat_to_remove is not None:
                 pats.pop(pat_to_remove)
+                _clear_stale_keys(f"na_pat_{i}_", pat_to_remove)
                 st.rerun()
             c1, c2 = st.columns(2)
             if c1.button("Add Pattern", key=f"na_pat_add_{i}"):
@@ -243,6 +281,8 @@ def _render_rules_tab():
             st.divider()
         if area_to_remove is not None:
             keywords.pop(area_to_remove)
+            for pfx in ("na_area_", "na_pat_", "na_pat_rm_", "na_pat_add_", "na_area_rm_"):
+                _clear_stale_keys(pfx, area_to_remove)
             st.rerun()
         if st.button("Add New National Area", key="na_add"):
             keywords.append({"area": "", "patterns": [""]})

@@ -142,9 +142,9 @@ class TestClassifier:
         classified, _ = classifier.classify(df, col_map)
         assert classified.iloc[0]["Lettershop Area"] == "Kerry"
 
-    def test_swords_lettershop(self, classifier):
+    def test_swords_national(self, classifier):
         df = _make_df(["Pavilions, Swords, Co Dublin"], ["Ireland"])
         col_map = ColumnMapping(country="Country")
         classified, _ = classifier.classify(df, col_map)
         assert classified.iloc[0]["Lettershop Area"] == "Swords"
-        assert classified.iloc[0]["Routing"] == "LETTERSHOP"
+        assert classified.iloc[0]["Routing"] == "NATIONAL"
