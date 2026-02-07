@@ -14,7 +14,7 @@ def sample_classified():
         "Name": ["Alice", "Bob", "Charlie"],
         "Address": ["Dublin 1", "Dublin 10", "Cork"],
         "combined_address": ["Dublin 1", "Dublin 10", "Cork"],
-        "Lettershop Area": ["Dublin 1", "Dublin 10", "Cork"],
+        "Area": ["Dublin 1", "Dublin 10", "Cork"],
         "Routing": ["LETTERSHOP", "LETTERSHOP", "NATIONAL"],
     })
 
@@ -25,7 +25,7 @@ def sample_exceptions():
         "Name": ["Dave"],
         "Address": [""],
         "combined_address": [""],
-        "Lettershop Area": [""],
+        "Area": [""],
         "Routing": [""],
         "_exception_reason": ["Empty address"],
     })
@@ -49,7 +49,7 @@ class TestWriteOutput:
         df = pd.read_excel(out_path, sheet_name="Data")
         assert "combined_address" not in df.columns
         assert "_exception_reason" not in df.columns
-        assert "Lettershop Area" in df.columns
+        assert "Area" in df.columns
         assert "Routing" in df.columns
 
     def test_exceptions_sheet_has_reason(self, tmp_path, sample_classified, sample_exceptions):
@@ -105,7 +105,7 @@ class TestWriteOutput:
     def test_empty_classified(self, tmp_path, sample_exceptions):
         """Should work with no classified rows."""
         out_path = tmp_path / "output.xlsx"
-        empty_cls = pd.DataFrame(columns=["Name", "Lettershop Area", "Routing"])
+        empty_cls = pd.DataFrame(columns=["Name", "Area", "Routing"])
         stats = write_output(out_path, empty_cls, sample_exceptions)
         assert stats.classified_rows == 0
 
@@ -118,7 +118,7 @@ class TestComputeStats:
         assert stats.exception_rows == 1
 
     def test_empty_dfs(self):
-        empty = pd.DataFrame(columns=["Lettershop Area"])
+        empty = pd.DataFrame(columns=["Area"])
         stats = _compute_stats(empty, empty)
         assert stats.total_rows == 0
 

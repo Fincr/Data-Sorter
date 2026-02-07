@@ -35,7 +35,7 @@ The output Excel workbook contains three sheets:
 
 | Sheet | Contents |
 |-------|----------|
-| **Data** | Classified rows with `Lettershop Area` and `Routing` columns, sorted with LETTERSHOP rows first |
+| **Data** | Classified rows with `Area` and `Routing` columns, sorted by Routing then Area |
 | **Exceptions** | Rows that couldn't be classified, with an `Exception Reason` column |
 | **Summary** | Row counts per area, exception count, and total reconciliation |
 

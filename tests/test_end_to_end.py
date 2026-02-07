@@ -64,34 +64,34 @@ class TestEndToEnd:
         _, _, df_data, _, _ = pipeline_output
         claire_row = df_data[df_data["First Name"] == "Claire"]
         assert len(claire_row) == 1
-        assert claire_row.iloc[0]["Lettershop Area"] == "Dublin 10"
+        assert claire_row.iloc[0]["Area"] == "Dublin 10"
 
     def test_dublin_6w(self, pipeline_output):
         _, _, df_data, _, _ = pipeline_output
         david_row = df_data[df_data["First Name"] == "David"]
         assert len(david_row) == 1
-        assert david_row.iloc[0]["Lettershop Area"] == "Dublin 6W"
+        assert david_row.iloc[0]["Area"] == "Dublin 6W"
 
     def test_dublin_1_rows(self, pipeline_output):
         _, _, df_data, _, _ = pipeline_output
-        d1_rows = df_data[df_data["Lettershop Area"] == "Dublin 1"]
+        d1_rows = df_data[df_data["Area"] == "Dublin 1"]
         assert len(d1_rows) == 2  # Alice and Fiona
 
     def test_blackrock_lettershop(self, pipeline_output):
         _, _, df_data, _, _ = pipeline_output
         helen_row = df_data[df_data["First Name"] == "Helen"]
-        assert helen_row.iloc[0]["Lettershop Area"] == "Blackrock"
+        assert helen_row.iloc[0]["Area"] == "Blackrock"
         assert helen_row.iloc[0]["Routing"] == "LETTERSHOP"
 
     def test_cork_national(self, pipeline_output):
         _, _, df_data, _, _ = pipeline_output
         kevin_row = df_data[df_data["First Name"] == "Kevin"]
-        assert kevin_row.iloc[0]["Lettershop Area"] == "Cork"
+        assert kevin_row.iloc[0]["Area"] == "Cork"
         assert kevin_row.iloc[0]["Routing"] == "NATIONAL"
 
     def test_kerry_national(self, pipeline_output):
         _, _, df_data, _, _ = pipeline_output
-        kerry_rows = df_data[df_data["Lettershop Area"] == "Kerry"]
+        kerry_rows = df_data[df_data["Area"] == "Kerry"]
         assert len(kerry_rows) == 2  # Mike and Niamh
 
     def test_lettershop_sorted_first(self, pipeline_output):
@@ -133,13 +133,13 @@ class TestEndToEnd:
         _, _, df_data, _, _ = pipeline_output
         gary_row = df_data[df_data["First Name"] == "Gary"]
         assert len(gary_row) == 1
-        assert gary_row.iloc[0]["Lettershop Area"] == "Dublin 15"
+        assert gary_row.iloc[0]["Area"] == "Dublin 15"
 
     def test_dun_laoghaire(self, pipeline_output):
         _, _, df_data, _, _ = pipeline_output
         jane_row = df_data[df_data["First Name"] == "Jane"]
         assert len(jane_row) == 1
-        assert jane_row.iloc[0]["Lettershop Area"] == "Dun Laoghaire"
+        assert jane_row.iloc[0]["Area"] == "Dun Laoghaire"
         assert jane_row.iloc[0]["Routing"] == "LETTERSHOP"
 
     def test_ireland_other_fallback(self, pipeline_output):
@@ -147,5 +147,5 @@ class TestEndToEnd:
         _, _, df_data, _, _ = pipeline_output
         rachel_row = df_data[df_data["First Name"] == "Rachel"]
         assert len(rachel_row) == 1
-        assert rachel_row.iloc[0]["Lettershop Area"] == "Ireland Other"
+        assert rachel_row.iloc[0]["Area"] == "Ireland Other"
         assert rachel_row.iloc[0]["Routing"] == "NATIONAL"

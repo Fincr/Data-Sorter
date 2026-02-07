@@ -77,7 +77,7 @@ class Classifier:
 
         Returns:
             (df_classified, df_exceptions) — both with added columns:
-            - Lettershop Area
+            - Area
             - Routing
             - _exception_reason (exceptions only)
         """
@@ -98,7 +98,7 @@ class Classifier:
                 progress_callback(i + 1, total)
 
         df = df.copy()
-        df["Lettershop Area"] = [r.area for r in results]
+        df["Area"] = [r.area for r in results]
         df["Routing"] = [r.routing for r in results]
         df["_exception_reason"] = [r.reason for r in results]
 
@@ -107,10 +107,9 @@ class Classifier:
         df_classified = df[~is_exception].drop(columns=["_exception_reason"])
         df_exceptions = df[is_exception].copy()
 
-        # Sort classified: LETTERSHOP first, then by area, preserving original order within groups
+        # Sort classified: by Routing then Area alphabetically (mergesort for stability)
         df_classified = df_classified.sort_values(
-            by=["Routing", "Lettershop Area"],
-            key=lambda col: col.map(lambda x: (0 if x == "LETTERSHOP" else 1, x)),
+            by=["Routing", "Area"],
             kind="mergesort",
         )
 

@@ -29,7 +29,7 @@ class TestClassifier:
         col_map = ColumnMapping(country="Country")
         classified, exceptions = classifier.classify(df, col_map)
         assert len(classified) == 1
-        assert classified.iloc[0]["Lettershop Area"] == "Dublin 10"
+        assert classified.iloc[0]["Area"] == "Dublin 10"
         assert classified.iloc[0]["Routing"] == "LETTERSHOP"
 
     def test_dublin_1_not_dublin_10(self, classifier):
@@ -37,40 +37,40 @@ class TestClassifier:
         df = _make_df(["Unit 5, Dublin 10"], ["Ireland"])
         col_map = ColumnMapping(country="Country")
         classified, _ = classifier.classify(df, col_map)
-        assert classified.iloc[0]["Lettershop Area"] == "Dublin 10"
+        assert classified.iloc[0]["Area"] == "Dublin 10"
 
     def test_dublin_6w(self, classifier):
         df = _make_df(["Rathgar, Dublin 6W"], ["Ireland"])
         col_map = ColumnMapping(country="Country")
         classified, _ = classifier.classify(df, col_map)
-        assert classified.iloc[0]["Lettershop Area"] == "Dublin 6W"
+        assert classified.iloc[0]["Area"] == "Dublin 6W"
 
     def test_lettershop_keyword_blackrock(self, classifier):
         df = _make_df(["123 Main St, Blackrock, Co. Dublin"], ["Ireland"])
         col_map = ColumnMapping(country="Country")
         classified, _ = classifier.classify(df, col_map)
-        assert classified.iloc[0]["Lettershop Area"] == "Blackrock"
+        assert classified.iloc[0]["Area"] == "Blackrock"
         assert classified.iloc[0]["Routing"] == "LETTERSHOP"
 
     def test_national_cork(self, classifier):
         df = _make_df(["456 Oak Road, Cork City"], ["Ireland"])
         col_map = ColumnMapping(country="Country")
         classified, _ = classifier.classify(df, col_map)
-        assert classified.iloc[0]["Lettershop Area"] == "Cork"
+        assert classified.iloc[0]["Area"] == "Cork"
         assert classified.iloc[0]["Routing"] == "NATIONAL"
 
     def test_national_galway(self, classifier):
         df = _make_df(["12 Shop St, Galway"], ["Ireland"])
         col_map = ColumnMapping(country="Country")
         classified, _ = classifier.classify(df, col_map)
-        assert classified.iloc[0]["Lettershop Area"] == "Galway"
+        assert classified.iloc[0]["Area"] == "Galway"
         assert classified.iloc[0]["Routing"] == "NATIONAL"
 
     def test_eircode_classification(self, classifier):
         df = _make_df(["123 Main St, D02 YX88"], ["Ireland"])
         col_map = ColumnMapping(country="Country")
         classified, _ = classifier.classify(df, col_map)
-        assert classified.iloc[0]["Lettershop Area"] == "Dublin 2"
+        assert classified.iloc[0]["Area"] == "Dublin 2"
         assert classified.iloc[0]["Routing"] == "LETTERSHOP"
 
     def test_empty_address_goes_to_exceptions(self, classifier):
@@ -86,14 +86,14 @@ class TestClassifier:
         df = _make_df(["123 Main St, Dublin 4, Ireland"])
         col_map = ColumnMapping()  # no country column
         classified, _ = classifier.classify(df, col_map)
-        assert classified.iloc[0]["Lettershop Area"] == "Dublin 4"
+        assert classified.iloc[0]["Area"] == "Dublin 4"
 
     def test_ireland_other_fallback(self, classifier):
         """Address in Ireland but no specific area match → Ireland Other."""
         df = _make_df(["Some Random Place, Ireland"], ["Ireland"])
         col_map = ColumnMapping(country="Country")
         classified, _ = classifier.classify(df, col_map)
-        assert classified.iloc[0]["Lettershop Area"] == "Ireland Other"
+        assert classified.iloc[0]["Area"] == "Ireland Other"
         assert classified.iloc[0]["Routing"] == "NATIONAL"
 
     def test_unknown_address_goes_to_exceptions(self, classifier):
@@ -129,7 +129,7 @@ class TestClassifier:
         )
         col_map = ColumnMapping(country="Country")
         classified, _ = classifier.classify(df, col_map)
-        areas = classified["Lettershop Area"].tolist()
+        areas = classified["Area"].tolist()
         assert "Dublin 1" in areas
         assert "Dublin 10" in areas
         assert "Dublin 6W" in areas
@@ -140,11 +140,11 @@ class TestClassifier:
         df = _make_df(["Tralee, Co. Kerry"], ["Ireland"])
         col_map = ColumnMapping(country="Country")
         classified, _ = classifier.classify(df, col_map)
-        assert classified.iloc[0]["Lettershop Area"] == "Kerry"
+        assert classified.iloc[0]["Area"] == "Kerry"
 
     def test_swords_national(self, classifier):
         df = _make_df(["Pavilions, Swords, Co Dublin"], ["Ireland"])
         col_map = ColumnMapping(country="Country")
         classified, _ = classifier.classify(df, col_map)
-        assert classified.iloc[0]["Lettershop Area"] == "Swords"
+        assert classified.iloc[0]["Area"] == "Swords"
         assert classified.iloc[0]["Routing"] == "NATIONAL"

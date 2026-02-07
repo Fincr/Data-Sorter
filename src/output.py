@@ -14,7 +14,7 @@ def write_output(
 ) -> PipelineStats:
     """Write classified data to a 3-sheet Excel workbook.
 
-    Sheet "Data": Original columns + Lettershop Area + Routing, sorted
+    Sheet "Data": Original columns + Area + Routing, sorted
                   (LETTERSHOP first, then by area).
     Sheet "Exceptions": Failed rows with reason column.
     Sheet "Summary": Counts per area, exception count, total reconciliation.
@@ -54,8 +54,8 @@ def _compute_stats(
     exception_count = len(df_exceptions)
 
     area_counts: dict[str, int] = {}
-    if "Lettershop Area" in df_classified.columns and classified_count > 0:
-        area_counts = df_classified["Lettershop Area"].value_counts().to_dict()
+    if "Area" in df_classified.columns and classified_count > 0:
+        area_counts = df_classified["Area"].value_counts().to_dict()
 
     routing_counts: dict[str, int] = {}
     if "Routing" in df_classified.columns and classified_count > 0:

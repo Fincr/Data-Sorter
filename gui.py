@@ -18,3 +18,13 @@ with col1:
     )
     if st.button("Open", key="open_lettershop_ireland", type="primary"):
         st.switch_page("pages/1_Lettershop_Ireland.py")
+
+with col2:
+    st.subheader("Correos - Spain")
+    st.markdown(
+        "Classify Spanish addresses into **D1** and **D2** routing "
+        "based on postal codes. D1 covers capitals, administrations, "
+        "and cities with over 50,000 inhabitants."
+    )
+    if st.button("Open", key="open_correos_spain", type="primary"):
+        st.switch_page("pages/3_Correos_Spain.py")
