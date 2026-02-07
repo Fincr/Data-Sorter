@@ -18,7 +18,7 @@ def main():
         description="Data-Sorter: Classify addresses into routing buckets.",
     )
     parser.add_argument("input", help="Input file path (.xlsx or .csv)")
-    parser.add_argument("output", help="Output file path (.xlsx)")
+    parser.add_argument("output", help="Output file path (.xlsx or .csv)")
     parser.add_argument(
         "--config",
         default=None,
@@ -74,12 +74,22 @@ def main():
             len(df_exceptions),
         )
 
-        # 5. Write output
+        # 5. Write output — match format to input
+        input_ext = Path(args.input).suffix.lower()
+        output_format = "csv" if input_ext == ".csv" else "xlsx"
+
         logger.info("Writing output to %s ...", args.output)
-        stats = write_output(args.output, df_classified, df_exceptions)
+        stats = write_output(args.output, df_classified, df_exceptions, format=output_format)
 
         # 6. Print summary
-        print(f"\nDone! Output written to: {args.output}")
+        if output_format == "csv":
+            stem = Path(args.output).parent / Path(args.output).stem
+            print(f"\nDone! Output written to:")
+            print(f"  {stem}_data.csv")
+            print(f"  {stem}_exceptions.csv")
+            print(f"  {stem}_summary.csv")
+        else:
+            print(f"\nDone! Output written to: {args.output}")
         print(f"  Classified: {stats.classified_rows}")
         print(f"  Exceptions: {stats.exception_rows}")
         print(f"  Total:      {stats.total_rows}")

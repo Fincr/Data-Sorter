@@ -2,6 +2,7 @@
 
 import io
 import tempfile
+import zipfile
 from pathlib import Path
 
 import pandas as pd
@@ -86,14 +87,35 @@ if uploaded_file is not None:
 
                 # 5. Write output to bytes buffer
                 st.write("Writing output...")
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as out_tmp:
+                input_ext = Path(uploaded_file.name).suffix.lower()
+                output_format = "csv" if input_ext == ".csv" else "xlsx"
+
+                with tempfile.NamedTemporaryFile(delete=False, suffix=f".{output_format}") as out_tmp:
                     out_path = out_tmp.name
 
-                stats = write_output(out_path, df_classified, df_exceptions)
+                stats = write_output(out_path, df_classified, df_exceptions, format=output_format)
 
                 # Read output for download
-                with open(out_path, "rb") as f:
-                    output_bytes = f.read()
+                if output_format == "csv":
+                    # Zip the 3 CSV files for a single download
+                    stem = Path(out_path).parent / Path(out_path).stem
+                    csv_files = {
+                        f"{Path(uploaded_file.name).stem}_data.csv": Path(f"{stem}_data.csv"),
+                        f"{Path(uploaded_file.name).stem}_exceptions.csv": Path(f"{stem}_exceptions.csv"),
+                        f"{Path(uploaded_file.name).stem}_summary.csv": Path(f"{stem}_summary.csv"),
+                    }
+                    zip_buffer = io.BytesIO()
+                    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+                        for arcname, filepath in csv_files.items():
+                            zf.write(filepath, arcname)
+                    output_bytes = zip_buffer.getvalue()
+                    output_filename = Path(uploaded_file.name).stem + "_sorted.zip"
+                    output_mime = "application/zip"
+                else:
+                    with open(out_path, "rb") as f:
+                        output_bytes = f.read()
+                    output_filename = Path(uploaded_file.name).stem + "_sorted.xlsx"
+                    output_mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
                 status.update(label="Processing complete!", state="complete")
 
@@ -134,12 +156,11 @@ if uploaded_file is not None:
                     st.dataframe(df_exceptions[display_cols], use_container_width=True)
 
             # Download button
-            output_filename = Path(uploaded_file.name).stem + "_sorted.xlsx"
             st.download_button(
                 label="📥 Download Output",
                 data=output_bytes,
                 file_name=output_filename,
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                mime=output_mime,
                 type="primary",
             )
 

@@ -1,4 +1,4 @@
-"""Output writer — produces a 3-sheet Excel workbook."""
+"""Output writer — produces a 3-sheet Excel workbook or 3 CSV files."""
 
 from pathlib import Path
 
@@ -11,13 +11,13 @@ def write_output(
     path: str | Path,
     df_classified: pd.DataFrame,
     df_exceptions: pd.DataFrame,
+    format: str = "xlsx",
 ) -> PipelineStats:
-    """Write classified data to a 3-sheet Excel workbook.
+    """Write classified data to output file(s).
 
-    Sheet "Data": Original columns + Area + Routing, sorted
-                  (LETTERSHOP first, then by area).
-    Sheet "Exceptions": Failed rows with reason column.
-    Sheet "Summary": Counts per area, exception count, total reconciliation.
+    When format="xlsx": Single 3-sheet Excel workbook (Data, Exceptions, Summary).
+    When format="csv": Three CSV files — {stem}_data.csv, {stem}_exceptions.csv,
+                       {stem}_summary.csv.
 
     Returns PipelineStats with summary counts.
     """
@@ -37,10 +37,20 @@ def write_output(
         if "combined_address" in df.columns:
             df.drop(columns=["combined_address"], inplace=True)
 
-    with pd.ExcelWriter(path, engine="openpyxl") as writer:
-        df_classified.to_excel(writer, sheet_name="Data", index=False)
-        df_exc_output.to_excel(writer, sheet_name="Exceptions", index=False)
-        df_summary.to_excel(writer, sheet_name="Summary", index=False)
+    if format == "csv":
+        stem = path.parent / path.stem
+        data_path = Path(f"{stem}_data.csv")
+        exc_path = Path(f"{stem}_exceptions.csv")
+        summary_path = Path(f"{stem}_summary.csv")
+
+        df_classified.to_csv(data_path, index=False)
+        df_exc_output.to_csv(exc_path, index=False)
+        df_summary.to_csv(summary_path, index=False)
+    else:
+        with pd.ExcelWriter(path, engine="openpyxl") as writer:
+            df_classified.to_excel(writer, sheet_name="Data", index=False)
+            df_exc_output.to_excel(writer, sheet_name="Exceptions", index=False)
+            df_summary.to_excel(writer, sheet_name="Summary", index=False)
 
     return stats
 

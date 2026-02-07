@@ -110,6 +110,51 @@ class TestWriteOutput:
         assert stats.classified_rows == 0
 
 
+class TestWriteOutputCSV:
+    def test_creates_three_files(self, tmp_path, sample_classified, sample_exceptions):
+        out_path = tmp_path / "output.csv"
+        write_output(out_path, sample_classified, sample_exceptions, format="csv")
+        assert (tmp_path / "output_data.csv").exists()
+        assert (tmp_path / "output_exceptions.csv").exists()
+        assert (tmp_path / "output_summary.csv").exists()
+
+    def test_data_csv_no_internal_columns(self, tmp_path, sample_classified, sample_exceptions):
+        out_path = tmp_path / "output.csv"
+        write_output(out_path, sample_classified, sample_exceptions, format="csv")
+        df = pd.read_csv(tmp_path / "output_data.csv")
+        assert "combined_address" not in df.columns
+        assert "_exception_reason" not in df.columns
+        assert "Area" in df.columns
+        assert "Routing" in df.columns
+
+    def test_exceptions_csv_has_reason(self, tmp_path, sample_classified, sample_exceptions):
+        out_path = tmp_path / "output.csv"
+        write_output(out_path, sample_classified, sample_exceptions, format="csv")
+        df = pd.read_csv(tmp_path / "output_exceptions.csv")
+        assert "Exception Reason" in df.columns
+        assert "_exception_reason" not in df.columns
+
+    def test_summary_csv_structure(self, tmp_path, sample_classified, sample_exceptions):
+        out_path = tmp_path / "output.csv"
+        stats = write_output(out_path, sample_classified, sample_exceptions, format="csv")
+        df = pd.read_csv(tmp_path / "output_summary.csv")
+        assert "Category" in df.columns
+        assert "Label" in df.columns
+        assert "Count" in df.columns
+        assert "Percentage" in df.columns
+
+        total_row = df[df["Label"] == "Total Rows"]
+        assert total_row.iloc[0]["Count"] == 4
+
+    def test_returns_stats(self, tmp_path, sample_classified, sample_exceptions):
+        out_path = tmp_path / "output.csv"
+        stats = write_output(out_path, sample_classified, sample_exceptions, format="csv")
+        assert isinstance(stats, PipelineStats)
+        assert stats.total_rows == 4
+        assert stats.classified_rows == 3
+        assert stats.exception_rows == 1
+
+
 class TestComputeStats:
     def test_basic(self, sample_classified, sample_exceptions):
         stats = _compute_stats(sample_classified, sample_exceptions)
