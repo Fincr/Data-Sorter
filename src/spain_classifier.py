@@ -100,6 +100,10 @@ class SpainClassifier:
             return None
 
         text = str(raw).strip()
+        # CSV may read postal codes as integers, dropping leading zeros (e.g. 01001 → 1001).
+        # Zero-pad purely numeric values back to 5 digits.
+        if text.isdigit():
+            text = text.zfill(5)
         match = _POSTCODE_RE.search(text)
         return match.group(1) if match else None
 
