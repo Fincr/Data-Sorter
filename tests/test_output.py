@@ -155,6 +155,21 @@ class TestWriteOutputCSV:
         assert stats.exception_rows == 1
 
 
+    def test_csv_preserves_leading_zeros(self, tmp_path):
+        """Leading zeros in postal codes must survive the CSV round-trip."""
+        classified = pd.DataFrame({
+            "Name": ["Ana"],
+            "PostalCode": ["01001"],
+            "Area": ["Vitoria-Gasteiz"],
+            "Routing": ["D1"],
+        })
+        exceptions = pd.DataFrame(columns=["Name", "_exception_reason"])
+        out_path = tmp_path / "output.csv"
+        write_output(out_path, classified, exceptions, format="csv")
+        result = pd.read_csv(tmp_path / "output_data.csv", dtype=str)
+        assert result.iloc[0]["PostalCode"] == "01001"
+
+
 class TestComputeStats:
     def test_basic(self, sample_classified, sample_exceptions):
         stats = _compute_stats(sample_classified, sample_exceptions)

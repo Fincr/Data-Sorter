@@ -55,7 +55,7 @@ def _load_csv(path: Path) -> pd.DataFrame:
     # Try UTF-8 first, then fall back to latin-1 (accepts any byte)
     for encoding in ("utf-8", "utf-8-sig", "latin-1"):
         try:
-            return pd.read_csv(path, encoding=encoding)
+            return pd.read_csv(path, encoding=encoding, dtype=str)
         except UnicodeDecodeError:
             continue
 
