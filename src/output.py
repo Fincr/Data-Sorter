@@ -23,6 +23,11 @@ def write_output(
     """
     path = Path(path)
 
+    # Add sequential CPG_UID column to classified data
+    if len(df_classified) > 0:
+        df_classified = df_classified.copy()
+        df_classified["CPG_UID"] = range(1, len(df_classified) + 1)
+
     # Build summary data
     stats = _compute_stats(df_classified, df_exceptions)
     df_summary = _build_summary_df(stats)

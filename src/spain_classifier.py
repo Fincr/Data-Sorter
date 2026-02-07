@@ -32,14 +32,17 @@ class SpainClassifier:
             (df_classified, df_exceptions) — both with added columns:
             - Area
             - Routing
+            - Province (classified only — 2-digit province from postal code)
             - _exception_reason (exceptions only)
         """
         results: list[ClassificationResult] = []
+        postcodes: list[str] = []
         total = len(df)
 
         for i, (idx, row) in enumerate(df.iterrows()):
-            result = self._classify_row(row, col_map)
+            result, postcode = self._classify_row(row, col_map)
             results.append(result)
+            postcodes.append(postcode)
 
             if progress_callback is not None:
                 progress_callback(i + 1, total)
@@ -48,24 +51,36 @@ class SpainClassifier:
         df["Area"] = [r.area for r in results]
         df["Routing"] = [r.routing for r in results]
         df["_exception_reason"] = [r.reason for r in results]
+        df["_postcode"] = postcodes
 
         # Split into classified and exceptions
         is_exception = df["_exception_reason"] != ""
         df_classified = df[~is_exception].drop(columns=["_exception_reason"])
         df_exceptions = df[is_exception].copy()
 
-        # Sort classified: by Routing then Area alphabetically (D1 before D2)
+        # Derive Province from first 2 digits of postal code
+        df_classified["Province"] = df_classified["_postcode"].str[:2]
+
+        # Sort classified: by Routing then postal code (groups by province naturally)
         df_classified = df_classified.sort_values(
-            by=["Routing", "Area"],
+            by=["Routing", "_postcode"],
             kind="mergesort",
         )
+
+        # Drop internal columns
+        df_classified = df_classified.drop(columns=["_postcode"])
+        df_exceptions = df_exceptions.drop(columns=["_postcode"])
 
         return df_classified, df_exceptions
 
     def _classify_row(
         self, row: pd.Series, col_map: ColumnMapping
-    ) -> ClassificationResult:
-        """Classify a single row by postal code lookup."""
+    ) -> tuple[ClassificationResult, str]:
+        """Classify a single row by postal code lookup.
+
+        Returns:
+            (ClassificationResult, postcode_str) — postcode is "" if not found.
+        """
         # 1. Try to get postcode from the mapped postcode column
         postcode = self._extract_postcode_from_column(row, col_map)
 
@@ -76,17 +91,20 @@ class SpainClassifier:
 
         # 3. No valid postcode → exception
         if not postcode:
-            return ClassificationResult(
-                area="", routing="", reason="No valid 5-digit postal code found"
+            return (
+                ClassificationResult(
+                    area="", routing="", reason="No valid 5-digit postal code found"
+                ),
+                "",
             )
 
         # 4. Look up in D1 mapping
         locality = match_d1_postal_code(postcode, self.d1_mapping)
         if locality:
-            return ClassificationResult(area=locality, routing="D1")
+            return ClassificationResult(area=locality, routing="D1"), postcode
 
         # 5. Not in D1 → D2
-        return ClassificationResult(area="D2", routing="D2")
+        return ClassificationResult(area="D2", routing="D2"), postcode
 
     def _extract_postcode_from_column(
         self, row: pd.Series, col_map: ColumnMapping

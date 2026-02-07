@@ -15,9 +15,9 @@ from src.ingest import load_file
 from src.output import write_output
 from src.spain_classifier import SpainClassifier
 
-st.set_page_config(page_title="Correos - Spain", page_icon="📮", layout="wide")
+st.set_page_config(page_title="Correos - Spain", page_icon="🇪🇸", layout="wide")
 
-st.title("📮 Correos - Spain")
+st.title("🇪🇸 Correos - Spain")
 st.markdown("Upload a Spanish address file (.xlsx or .csv) to classify addresses into **D1** and **D2** routing based on postal codes.")
 
 # File upload

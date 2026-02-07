@@ -170,6 +170,35 @@ class TestWriteOutputCSV:
         assert result.iloc[0]["PostalCode"] == "01001"
 
 
+class TestCPGUID:
+    def test_cpg_uid_exists_and_sequential(self, tmp_path, sample_classified, sample_exceptions):
+        out_path = tmp_path / "output.xlsx"
+        write_output(out_path, sample_classified, sample_exceptions)
+        df = pd.read_excel(out_path, sheet_name="Data")
+        assert "CPG_UID" in df.columns
+        assert list(df["CPG_UID"]) == [1, 2, 3]
+
+    def test_cpg_uid_not_in_exceptions(self, tmp_path, sample_classified, sample_exceptions):
+        out_path = tmp_path / "output.xlsx"
+        write_output(out_path, sample_classified, sample_exceptions)
+        df = pd.read_excel(out_path, sheet_name="Exceptions")
+        assert "CPG_UID" not in df.columns
+
+    def test_cpg_uid_empty_classified(self, tmp_path, sample_exceptions):
+        out_path = tmp_path / "output.xlsx"
+        empty_cls = pd.DataFrame(columns=["Name", "Area", "Routing"])
+        write_output(out_path, empty_cls, sample_exceptions)
+        df = pd.read_excel(out_path, sheet_name="Data")
+        assert "CPG_UID" not in df.columns or len(df) == 0
+
+    def test_cpg_uid_csv(self, tmp_path, sample_classified, sample_exceptions):
+        out_path = tmp_path / "output.csv"
+        write_output(out_path, sample_classified, sample_exceptions, format="csv")
+        df = pd.read_csv(tmp_path / "output_data.csv")
+        assert "CPG_UID" in df.columns
+        assert list(df["CPG_UID"]) == [1, 2, 3]
+
+
 class TestComputeStats:
     def test_basic(self, sample_classified, sample_exceptions):
         stats = _compute_stats(sample_classified, sample_exceptions)

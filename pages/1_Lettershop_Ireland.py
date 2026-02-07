@@ -15,9 +15,9 @@ from src.exceptions import ColumnDetectionError, ConfigError, FileFormatError
 from src.ingest import load_file
 from src.output import write_output
 
-st.set_page_config(page_title="Lettershop - Ireland", page_icon="📬", layout="wide")
+st.set_page_config(page_title="Lettershop - Ireland", page_icon="🇮🇪", layout="wide")
 
-st.title("📬 Lettershop - Ireland")
+st.title("🇮🇪 Lettershop - Ireland")
 st.markdown("Upload an Irish address file (.xlsx or .csv) to classify addresses into Lettershop and National routing buckets.")
 
 # File upload
